@@ -1,0 +1,81 @@
+---
+title: "Pairwise Sequence Alignment Instincts Showdown"
+output: html_notebook
+---
+
+```{r}
+# Basic Needleman-Wunsch with Constant Gap Penalty: (via: https://github.com/meicaljohnjones/Needleman-Wunsch)
+devtools::install_github("hiraethus/Needleman-Wunsch")
+library("hiraethus.needleman.wunsch")
+```
+```{r}
+sequence1 <- "gcgcgtgcgcggaaggagccaaggtgaagttgtagcagtgtgtcagaagaggtgcgtggcac"
+sequence2 <- "gacttgtggaacctacttcctgaaaataaccttctgtcctccgagctctccgcacccgtgga"
+
+match <- 
+mismatch <- 
+gap <- 
+
+alignment <- needle(sequence1, sequence2, gap, match, mismatch)
+
+print(alignment)
+```
+
+Exercise 1: THE WARM UP
+
+Test the basic Needleman-Wunsch alignment algorithm above, trying to get as close as possible to the alignment shown below. There are no crazy surprise numbers - just toy with small integers (|x|, |y|, |z| ≤ 5) to see how the alignment changes. Score serves as tiebreaker if more than one person gets the alignment identical. Person who comes closest gets bragging rights and a mini nerd prize!
+
+Alignment 1: g c g c g t g c g c g g a a g g _ a g _ _ c c _ _ a a g g t g a a g _ t t _ _ g t a g _ c a g t g _ t g t c a g a a g a g g t g c g t g g c a c
+Alignment 2: g a _ c t t g t g _ g _ a a c c t a c t t c c t g a a a a t _ a a c c t t c t g t c c t c c g a g c t c t c c g c a c c _ _ _ _ c g t g g _ a _
+Max score : 42
+
+```{r}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("Biostrings")
+
+library(Biostrings)
+
+```
+```{r}
+
+s1 <- DNAString("ACTTCACCAGCTCCCTGGCGGTAAGTTGATCAAAGGAAACGCAAAGTTTTCAAG")
+s2 <- DNAString("GTTTCACTACTTCCTTTCGGGTAAGTAAATATATAAATATATAAAAATATAATTTTCATC")
+
+inputmatch <- 
+inputmismatch <- 
+inputgapopen <- 
+inputgapextend <- 
+
+# First use a fixed substitution matrix
+mat <- nucleotideSubstitutionMatrix(match = inputmatch, mismatch = inputmismatch, baseOnly = TRUE)
+
+globalAlign <- pairwiseAlignment(s1, s2, substitutionMatrix = mat, gapOpening = inputgapopen, gapExtension = inputgapextend)
+localAlign <- pairwiseAlignment(s1, s2, type = "local", substitutionMatrix = mat,gapOpening = inputgapopen, gapExtension = inputgapextend)
+
+print("Here is your global alignment:")
+print(globalAlign)
+
+print("Here is your local alignment:")
+print(localAlign)
+
+```
+
+Exercise 2: THE GAME IS AFOOT
+
+Test your alignment instincts using Bioconductor's Biostrings. Manipulate the match score and the mismatch, gap opening, and gap extending penalties to get as close as possible to the alignment shown below. There are no crazy surprise numbers - just toy with small integers (|x|, |y|, |z| ≤ 5) to see how the alignment changes. Score serves as tiebreaker if more than one person gets the alignment identical. Person(s) who comes closest gets bragging rights and a mini nerd prize!
+
+
+Global PairwiseAlignmentsSingleSubject (1 of 1)
+pattern: --ACTTCACCAGCTCCCT---GGCGGTAAGT-----TGATCAAA-----GGAAACGCAA----AGTTTTCA--AG
+subject: GT--TTCACTA-CTTCCTTTCGG--GTAAGTAAATAT-AT-AAATATAT--AAA---AATATAA-TTTTCATC--
+score: 35 
+
+Local PairwiseAlignmentsSingleSubject (1 of 1)
+pattern: [3] TTCACCAGCTCCCT---GGCGGTAAGT-----TGATCAAA-----GGAAACGCAA----AGTTTTCA
+subject: [3] TTCACTA-CTTCCTTTCGG--GTAAGTAAATAT-AT-AAATATAT--AAA---AATATAA-TTTTCA
+score: 51
+
+Conceptual discussion note: What do the differences in highest scores here between local (Smith Waterman) and global alignment (Needleman Wusnch) indicate?
+
